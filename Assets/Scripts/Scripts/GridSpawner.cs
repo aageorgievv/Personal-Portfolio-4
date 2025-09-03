@@ -15,8 +15,8 @@ public class GridSpawner : MonoBehaviour
     [SerializeField] Vector3 gridOrigin = Vector3.zero;
 
     [Header("Island Settings")]
-    [SerializeField] private int islandSize = 2;
-    [SerializeField] private float islandChance = 0.1f;
+    [SerializeField, Range(1, 5)] private int islandSize = 2;
+    [SerializeField, Range(0.1f, 0.5f)] private float islandChance = 0.1f;
 
     private bool[,] occupied;
 
