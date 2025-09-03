@@ -43,12 +43,31 @@ public class ShipSelection : MonoBehaviour
             {
                 Vector3 hitPoint = ray.GetPoint(enter);
                 currentlyHeldShip.transform.position = new Vector3(hitPoint.x, yOffset, hitPoint.z);
+                currentlyHeldShip.Rotate();
             }
         }
 
         if (Input.GetMouseButtonUp(0))
         {
+            SnapShipToNearestCell(currentlyHeldShip);
             currentlyHeldShip = null;
+        }
+    }
+
+    private void SnapShipToNearestCell(Ship ship)
+    {
+        if(ship == null)
+        {
+            return;
+        }
+
+        Cell cell = ship.GetNearestCell();
+
+        if (cell != null)
+        {
+            Vector3 snapPosition = new Vector3(cell.transform.position.x, yOffset, cell.transform.position.z);
+            ship.transform.position = snapPosition;
+            Debug.Log($"Snapped to {cell.GetCellType()} at {snapPosition}");
         }
     }
 }

@@ -389,8 +389,8 @@ GameObject:
   - component: {fileID: 492366582}
   - component: {fileID: 492366581}
   - component: {fileID: 492366580}
-  - component: {fileID: 492366579}
   - component: {fileID: 492366584}
+  - component: {fileID: 492366585}
   m_Layer: 0
   m_Name: Ship
   m_TagString: Untagged
@@ -398,20 +398,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &492366579
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 492366578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7928501b76424ab4bb4fcce355e30c0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  size: 5
-  hitpoints: 5
 --- !u!65 &492366580
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -515,6 +501,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   size: 4
   hitpoints: 4
+--- !u!54 &492366585
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 492366578}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &501159381
 GameObject:
   m_ObjectHideFlags: 0
@@ -527,8 +540,8 @@ GameObject:
   - component: {fileID: 501159386}
   - component: {fileID: 501159385}
   - component: {fileID: 501159384}
-  - component: {fileID: 501159383}
   - component: {fileID: 501159382}
+  - component: {fileID: 501159388}
   m_Layer: 0
   m_Name: Ship (2)
   m_TagString: Untagged
@@ -548,22 +561,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7928501b76424ab4bb4fcce355e30c0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  size: 3
-  hitpoints: 3
---- !u!114 &501159383
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 501159381}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7928501b76424ab4bb4fcce355e30c0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  size: 5
-  hitpoints: 5
+  size: 2
+  hitpoints: 2
 --- !u!65 &501159384
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -653,6 +652,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &501159388
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501159381}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &504301556
 GameObject:
   m_ObjectHideFlags: 0
@@ -862,8 +888,8 @@ GameObject:
   - component: {fileID: 968542927}
   - component: {fileID: 968542926}
   - component: {fileID: 968542925}
-  - component: {fileID: 968542924}
   - component: {fileID: 968542923}
+  - component: {fileID: 968542929}
   m_Layer: 0
   m_Name: Ship (3)
   m_TagString: Untagged
@@ -883,22 +909,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7928501b76424ab4bb4fcce355e30c0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  size: 3
-  hitpoints: 3
---- !u!114 &968542924
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 968542922}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7928501b76424ab4bb4fcce355e30c0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  size: 5
-  hitpoints: 5
+  size: 1
+  hitpoints: 1
 --- !u!65 &968542925
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -988,6 +1000,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &968542929
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 968542922}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &992639903
 GameObject:
   m_ObjectHideFlags: 0
@@ -1396,8 +1435,8 @@ GameObject:
   - component: {fileID: 1912770376}
   - component: {fileID: 1912770375}
   - component: {fileID: 1912770374}
-  - component: {fileID: 1912770373}
   - component: {fileID: 1912770372}
+  - component: {fileID: 1912770378}
   m_Layer: 0
   m_Name: Ship (1)
   m_TagString: Untagged
@@ -1419,20 +1458,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   size: 3
   hitpoints: 3
---- !u!114 &1912770373
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1912770371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7928501b76424ab4bb4fcce355e30c0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  size: 5
-  hitpoints: 5
 --- !u!65 &1912770374
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1522,6 +1547,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!54 &1912770378
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1912770371}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1987949813
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,10 +9,25 @@ public class Ship : MonoBehaviour
     private bool isPlaced;
     private bool isVertical;
 
+    private Cell currentStandingCell;
+
     public void Rotate()
     {
-        isVertical = !isVertical;
-        transform.Rotate(0, 0, isVertical ? 90 : -90);
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            isVertical = !isVertical;
+            transform.Rotate(0, isVertical ? 90 : -90, 0);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Cell cell = other.gameObject.GetComponent<Cell>();
+
+        if (cell != null)
+        {
+            currentStandingCell = cell;
+        }
     }
 
     private void TakeHit()
@@ -23,6 +38,11 @@ public class Ship : MonoBehaviour
         {
             Sink();
         }
+    }
+
+    public Cell GetNearestCell()
+    {
+        return currentStandingCell;
     }
 
     private void Sink()
