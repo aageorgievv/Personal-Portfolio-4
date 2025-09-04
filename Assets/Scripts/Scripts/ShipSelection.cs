@@ -9,6 +9,14 @@ public class ShipSelection : MonoBehaviour
     private float yOffset = 0.6f;
     private int raycastDistance = 30;
 
+    private GridManager gridManager;
+
+    private void Awake()
+    {
+
+        GameManager.ExecuteWhenInitialized(HandleWhenInitialized);
+    }
+
     private void Start()
     {
         boardPlane = new Plane(Vector3.up, Vector3.zero);
@@ -17,6 +25,12 @@ public class ShipSelection : MonoBehaviour
     private void Update()
     {
         UpdateMouseLeft();
+    }
+
+    private void HandleWhenInitialized()
+    {
+        gridManager = GameManager.GetManager<GridManager>();
+        ValidationUtility.ValidateReference(gridManager, nameof(gridManager));
     }
 
     private void UpdateMouseLeft()
@@ -56,18 +70,45 @@ public class ShipSelection : MonoBehaviour
 
     private void SnapShipToNearestCell(Ship ship)
     {
-        if(ship == null)
+        if (ship == null)
         {
             return;
         }
 
-        Cell cell = ship.GetNearestCell();
+        Cell anchorCell = ship.GetNearestCell();
 
-        if (cell != null)
+        if (anchorCell == null)
         {
-            Vector3 snapPosition = new Vector3(cell.transform.position.x, yOffset, cell.transform.position.z);
+            return;
+        }
+
+        bool isValid = true;
+        Cell[] occupiedCells = new Cell[ship.Size];
+
+        for (int i = 0; i < ship.Size; i++)
+        {
+            int row = anchorCell.Row + (ship.IsVertical ? i : 0);
+            int col = anchorCell.Col + (ship.IsVertical ? 0 : i);
+
+            Cell cell = gridManager.GetCell(row, col);
+
+            if (cell == null || cell.GetCellType() == ECellType.Land)
+            {
+                isValid = false;
+                break;
+            }
+
+            occupiedCells[i] = cell;
+        }
+
+        if (isValid)
+        {
+            Vector3 snapPosition = new Vector3(anchorCell.transform.position.x, yOffset, anchorCell.transform.position.z);
             ship.transform.position = snapPosition;
-            Debug.Log($"Snapped to {cell.GetCellType()} at {snapPosition}");
+            Debug.Log($"Snapped to {anchorCell.GetCellType()} at {snapPosition}");
+        } else
+        {
+            Debug.LogError("Invalid placement! Outside of grid or Land");
         }
     }
 }

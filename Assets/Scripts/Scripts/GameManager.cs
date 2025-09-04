@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour, IManager
 {
     [Header("References")]
+    [SerializeField] private GridManager gridManager;
 
     private static Dictionary<Type, IManager> managers = new Dictionary<Type, IManager>();
 
@@ -14,10 +15,12 @@ public class GameManager : MonoBehaviour, IManager
     private void Awake()
     {
         //Validate
+        ValidationUtility.ValidateReference(gridManager, nameof(gridManager));
 
         managers.Clear();
         //Add references
         managers.Add(typeof(GameManager), this);
+        managers.Add(typeof(GridManager), gridManager);
 
         isInitialized = true;
         onInitializedCallback?.Invoke();

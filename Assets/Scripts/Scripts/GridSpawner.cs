@@ -3,14 +3,15 @@ using UnityEngine;
 
 public class GridSpawner : MonoBehaviour
 {
+    public int GridSize => gridSize;
+    public Cell[,] Cells => grid;
     //Later make a Cell abstract class and Water, Land child classes
     [Header("References")]
     [SerializeField] private Cell waterCellPrefab;
     [SerializeField] private Cell landCellPrefab;
 
     [Header("Grid Settings")]
-    [SerializeField] private int sizeX;
-    [SerializeField] private int sizeZ;
+    [SerializeField] private int gridSize;
     [SerializeField] private float gridSpacingOffset = 1f;
     [SerializeField] Vector3 gridOrigin = Vector3.zero;
 
@@ -19,18 +20,21 @@ public class GridSpawner : MonoBehaviour
     [SerializeField, Range(0.1f, 0.5f)] private float islandChance = 0.1f;
 
     private bool[,] occupied;
+    private Cell[,] grid;
 
     void Start()
     {
-        occupied = new bool[sizeX, sizeZ];
+        occupied = new bool[gridSize, gridSize];
+        grid = new Cell[gridSize, gridSize];
         SpawnGrid();
     }
 
     private void SpawnGrid()
     {
-        for (int x = 0; x < sizeX; x++)
+
+        for (int x = 0; x < gridSize; x++)
         {
-            for (int z = 0; z < sizeZ; z++)
+            for (int z = 0; z < gridSize; z++)
             {
                 if (occupied[x, z])
                 {
@@ -43,17 +47,20 @@ public class GridSpawner : MonoBehaviour
                 }
                 else
                 {
-                    SpawnCell(waterCellPrefab, x, z);
+                    grid[x, z] = SpawnCell(waterCellPrefab, x, z);
                 }
             }
         }
     }
 
-    private void SpawnCell(Cell prefab, int x, int z)
+    private Cell SpawnCell(Cell prefab, int x, int z)
     {
         Vector3 spawnPosition = new Vector3(x * gridSpacingOffset, 0, z * gridSpacingOffset) + gridOrigin;
-        Instantiate(prefab, spawnPosition, Quaternion.identity, transform);
+        Cell cell = Instantiate(prefab, spawnPosition, Quaternion.identity, transform);
         occupied[x, z] = true;
+        cell.SetCell(x, z);
+
+        return cell;
     }
 
     private void PlaceIsland(int startX, int startZ)
@@ -62,14 +69,14 @@ public class GridSpawner : MonoBehaviour
         {
             for (int z = 0; z < islandSize; z++)
             {
-                SpawnCell(landCellPrefab, startX + x, startZ + z);
+                grid[startX + x, startZ + z] = SpawnCell(landCellPrefab, startX + x, startZ + z);
             }
         }
     }
 
     private bool CanPlaceIsland(int startX, int startZ)
     {
-        if (startX + islandSize > sizeX || startZ + islandSize > sizeZ)
+        if (startX + islandSize > gridSize || startZ + islandSize > gridSize)
         {
             return false;
         }

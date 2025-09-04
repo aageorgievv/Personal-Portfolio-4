@@ -2,12 +2,14 @@ using UnityEngine;
 
 public class Ship : MonoBehaviour
 {
+    public int Size => size;
+    public bool IsVertical => isVertical;
+
     [Header("Settings")]
     [SerializeField] private int size;
     [SerializeField] private int hitpoints;
 
-    private bool isPlaced;
-    private bool isVertical;
+    private bool isVertical = false;
 
     private Cell currentStandingCell;
 
@@ -27,16 +29,6 @@ public class Ship : MonoBehaviour
         if (cell != null)
         {
             currentStandingCell = cell;
-        }
-    }
-
-    private void TakeHit()
-    {
-        hitpoints--;
-
-        if(hitpoints <= 0)
-        {
-            Sink();
         }
     }
 

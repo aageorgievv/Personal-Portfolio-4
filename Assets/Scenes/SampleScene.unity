@@ -1624,8 +1624,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waterCellPrefab: {fileID: 5687225442897770235, guid: 438a3cc7a34a55649a704a1c5a92db02, type: 3}
   landCellPrefab: {fileID: 5687225442897770235, guid: 59197b671fa380146ac24aad5a43ff77, type: 3}
-  sizeX: 12
-  sizeZ: 12
+  gridSize: 12
   gridSpacingOffset: 1.25
   gridOrigin: {x: -6.9, y: 0.1, z: -8.4}
   islandSize: 2
