@@ -3,22 +3,28 @@ using UnityEngine;
 public class Ship : MonoBehaviour
 {
     public int Size => size;
-    public bool IsVertical => isVertical;
+    public bool IsVertical => IsHorizontal;
+
+    [Header("References")]
 
     [Header("Settings")]
     [SerializeField] private int size;
-    [SerializeField] private int hitpoints;
-
-    private bool isVertical = false;
+    [SerializeField] private bool IsHorizontal = false;
 
     private Cell currentStandingCell;
+    private Vector3 spawnPosition;
+
+    private void Start()
+    {
+        spawnPosition = transform.position;
+    }
 
     public void Rotate()
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            isVertical = !isVertical;
-            transform.Rotate(0, isVertical ? 90 : -90, 0);
+            IsHorizontal = !IsHorizontal;
+            transform.Rotate(0, IsHorizontal ? 90 : -90, 0);
         }
     }
 
@@ -35,6 +41,11 @@ public class Ship : MonoBehaviour
     public Cell GetNearestCell()
     {
         return currentStandingCell;
+    }
+
+    public void ReturnToSpawnPosition()
+    {
+        transform.position = spawnPosition;
     }
 
     private void Sink()

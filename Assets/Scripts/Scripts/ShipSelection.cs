@@ -110,6 +110,7 @@ public class ShipSelection : MonoBehaviour
         } else
         {
             Debug.LogError("Invalid placement! Outside of grid or Land");
+            ship.ReturnToSpawnPosition();
         }
     }
 }
