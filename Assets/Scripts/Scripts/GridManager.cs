@@ -3,20 +3,22 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour, IManager
 {
-    [SerializeField] private GridSpawner gridSpawner;
-
     private Cell[,] grid;
     private int gridSize;
 
-    private void Awake()
+    private GridSpawner gridSpawner;
+
+    public void Initialize(GridSpawner spawner)
     {
-        ValidationUtility.ValidateReference(gridSpawner, nameof(gridSpawner));
-        gridSize = gridSpawner.GridSize;
+        gridSpawner = spawner;
         grid = gridSpawner.Cells;
+        gridSize = gridSpawner.GridSize;
     }
 
     public Cell GetCell(int row, int col)
     {
+        ValidationUtility.ValidateReference(grid, nameof(grid));
+
         if (row < 0 || col < 0 || row >= gridSize || col >= gridSize)
         {
             return null;

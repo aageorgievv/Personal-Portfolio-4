@@ -21,12 +21,21 @@ public class GridSpawner : MonoBehaviour
 
     private bool[,] occupied;
     private Cell[,] grid;
+    private GridManager gridManager;
 
-    void Start()
+    void Awake()
     {
         occupied = new bool[gridSize, gridSize];
         grid = new Cell[gridSize, gridSize];
         SpawnGrid();
+        GameManager.ExecuteWhenInitialized(HandleAfterInitialized);
+    }
+
+    private void HandleAfterInitialized()
+    {
+        gridManager = GameManager.GetManager<GridManager>();
+        ValidationUtility.ValidateReference(gridManager, nameof(gridManager));
+        gridManager.Initialize(this);
     }
 
     private void SpawnGrid()

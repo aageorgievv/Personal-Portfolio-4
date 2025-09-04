@@ -90,6 +90,7 @@ public class ShipSelection : MonoBehaviour
             int row = anchorCell.Row + (ship.IsVertical ? i : 0);
             int col = anchorCell.Col + (ship.IsVertical ? 0 : i);
 
+            Debug.Log($"IsVertical {ship.IsVertical}");
             Cell cell = gridManager.GetCell(row, col);
 
             if (cell == null || cell.GetCellType() == ECellType.Land)
