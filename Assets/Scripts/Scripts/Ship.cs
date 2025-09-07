@@ -3,18 +3,18 @@ using UnityEngine;
 public class Ship : MonoBehaviour
 {
     public int Size => size;
-    public bool IsVertical => IsHorizontal;
+    public bool IsHorizontal => isHorizontal;
 
     [Header("References")]
 
     [Header("Settings")]
     [SerializeField] private int size;
-    [SerializeField] private bool IsHorizontal = false;
+    [SerializeField] private bool isHorizontal = false;
 
     private Cell currentStandingCell;
     private Vector3 spawnPosition;
 
-    private void Start()
+    private void Awake()
     {
         spawnPosition = transform.position;
     }
@@ -23,8 +23,8 @@ public class Ship : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            IsHorizontal = !IsHorizontal;
-            transform.Rotate(0, IsHorizontal ? 90 : -90, 0);
+            isHorizontal = !isHorizontal;
+            transform.Rotate(0, isHorizontal ? 90 : -90, 0);
         }
     }
 
@@ -40,6 +40,17 @@ public class Ship : MonoBehaviour
 
     public Cell GetNearestCell()
     {
+
+        // sphere cast
+        // get a list of cells in the sphere
+        // get the nearest one
+        // return it
+
+        // or the more common way
+        // give the ship position to the grid manager
+        // and ask the grid manager to tell you what cell that is based on math, usually (position / cellSize)
+
+
         return currentStandingCell;
     }
 

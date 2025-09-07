@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour, IManager
@@ -11,6 +14,7 @@ public class GameManager : MonoBehaviour, IManager
 
     private static event Action onInitializedCallback;
     private static bool isInitialized;
+    private bool triedAsClient = false;
 
     private void Awake()
     {
@@ -27,6 +31,14 @@ public class GameManager : MonoBehaviour, IManager
         onInitializedCallback = null;
     }
 
+    private void Start()
+    {
+        NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+
+        // Try to join as client first
+        TryJoinAsClient();
+    }
+
     public static T GetManager<T>() where T : IManager
     {
         return (T)managers[typeof(T)];
@@ -41,6 +53,31 @@ public class GameManager : MonoBehaviour, IManager
         else
         {
             onInitializedCallback += callback;
+        }
+    }
+
+    private void TryJoinAsClient()
+    {
+        triedAsClient = true;
+        NetworkManager.Singleton.StartClient();
+    }
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        if (triedAsClient && clientId == NetworkManager.Singleton.LocalClientId)
+        {
+            StartCoroutine(StartHostWithDelay(3f));
+        }
+    }
+
+    private IEnumerator StartHostWithDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (!NetworkManager.Singleton.IsListening)
+        {
+            Debug.Log("Becoming host now...");
+            NetworkManager.Singleton.StartHost();
         }
     }
 }

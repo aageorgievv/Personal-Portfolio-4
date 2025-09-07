@@ -1,9 +1,11 @@
-using Unity.VisualScripting;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 
 public class ShipSelection : MonoBehaviour
 {
     [SerializeField] private Ship currentlyHeldShip;
+
 
     private Plane boardPlane;
     private float yOffset = 0.6f;
@@ -13,13 +15,13 @@ public class ShipSelection : MonoBehaviour
 
     private void Awake()
     {
-
+        boardPlane = new Plane(Vector3.up, Vector3.zero);
         GameManager.ExecuteWhenInitialized(HandleWhenInitialized);
     }
 
-    private void Start()
+    private void OnDestroy()
     {
-        boardPlane = new Plane(Vector3.up, Vector3.zero);
+
     }
 
     private void Update()
@@ -39,7 +41,6 @@ public class ShipSelection : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-
             if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
             {
                 Ship ship = hit.collider.GetComponent<Ship>();
@@ -87,10 +88,10 @@ public class ShipSelection : MonoBehaviour
 
         for (int i = 0; i < ship.Size; i++)
         {
-            int row = anchorCell.Row + (ship.IsVertical ? i : 0);
-            int col = anchorCell.Col + (ship.IsVertical ? 0 : i);
+            int row = anchorCell.Row + (ship.IsHorizontal ? i : 0);
+            int col = anchorCell.Col + (ship.IsHorizontal ? 0 : i);
 
-            Debug.Log($"IsVertical {ship.IsVertical}");
+            Debug.Log($"IsVertical {ship.IsHorizontal}");
             Cell cell = gridManager.GetCell(row, col);
 
             if (cell == null || cell.GetCellType() == ECellType.Land)
@@ -107,7 +108,8 @@ public class ShipSelection : MonoBehaviour
             Vector3 snapPosition = new Vector3(anchorCell.transform.position.x, yOffset, anchorCell.transform.position.z);
             ship.transform.position = snapPosition;
             Debug.Log($"Snapped to {anchorCell.GetCellType()} at {snapPosition}");
-        } else
+        }
+        else
         {
             Debug.LogError("Invalid placement! Outside of grid or Land");
             ship.ReturnToSpawnPosition();
