@@ -1,16 +1,16 @@
-using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
+using System;
 using UnityEngine;
 
-public class ShipSelection : MonoBehaviour
+public class ShipSelection : MonoBehaviour, IManager
 {
-    [SerializeField] private Ship currentlyHeldShip;
-
+    public Action<int> OnShipPlacedEvent;
 
     private Plane boardPlane;
     private float yOffset = 0.6f;
     private int raycastDistance = 30;
+    private int currentlyPlacedShips = 0;
 
+    private Ship currentlyHeldShip;
     private GridManager gridManager;
 
     private void Awake()
@@ -107,12 +107,15 @@ public class ShipSelection : MonoBehaviour
         {
             Vector3 snapPosition = new Vector3(anchorCell.transform.position.x, yOffset, anchorCell.transform.position.z);
             ship.transform.position = snapPosition;
+            currentlyPlacedShips++;
+            OnShipPlacedEvent?.Invoke(currentlyPlacedShips);
             Debug.Log($"Snapped to {anchorCell.GetCellType()} at {snapPosition}");
         }
         else
         {
-            Debug.LogError("Invalid placement! Outside of grid or Land");
             ship.ReturnToSpawnPosition();
+            currentlyPlacedShips--;
+            Debug.LogError("Invalid placement! Outside of grid or Land");
         }
     }
 }
