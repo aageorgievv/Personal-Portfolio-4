@@ -3805,6 +3805,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 2066526787}
     m_Modifications:
     - target: {fileID: 2797867076842505604, guid: 65d5cf70a014ea14db2e620c21d0ed4a, type: 3}
+      propertyPath: spawner
+      value: 
+      objectReference: {fileID: 1987949815}
+    - target: {fileID: 2797867076842505604, guid: 65d5cf70a014ea14db2e620c21d0ed4a, type: 3}
       propertyPath: uiManager
       value: 
       objectReference: {fileID: 323582777}

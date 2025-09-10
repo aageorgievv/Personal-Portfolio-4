@@ -11,7 +11,6 @@ public class Ship : MonoBehaviour
     [SerializeField] private int size;
 
     private bool isHorizontal = true;
-    private Cell currentStandingCell;
     private GridManager gridManager;
     private Vector3 spawnPosition;
 
@@ -39,7 +38,7 @@ public class Ship : MonoBehaviour
     public Cell GetNearestCell()
     {
 
-        float searchRadius = gridManager.CellSize;
+        float searchRadius = 1.25f;
 
         Collider[] hits = Physics.OverlapSphere(transform.position, searchRadius);
 
@@ -64,12 +63,12 @@ public class Ship : MonoBehaviour
         return nearestCell;
     }
 
-    private void OnDrawGizmosSelected()
+/*    private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         float radius = gridManager.CellSize * 0.3f;
         Gizmos.DrawWireSphere(transform.position, radius);
-    }
+    }*/
 
     public void ReturnToSpawnPosition()
     {

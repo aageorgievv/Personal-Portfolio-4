@@ -2,20 +2,10 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
-//public class GridState : NetworkBehaviour
-//{
-//    public bool isSpawned;
-//    public ECellType[,] cells;
-//}
-
 public class GridSpawner : MonoBehaviour
 {
-    public Vector3 GridOrigin => gridOrigin;
-    public float GridSpacingOffset => gridSpacingOffset;
-
     public int GridSize => gridSize;
     public Cell[,] Cells => grid;
-    //Later make a Cell abstract class and Water, Land child classes
     [Header("References")]
     [SerializeField] private Cell waterCellPrefab;
     [SerializeField] private Cell landCellPrefab;
@@ -33,19 +23,13 @@ public class GridSpawner : MonoBehaviour
     private Cell[,] grid;
     private GridManager gridManager;
 
-    //private NetworkVariable<GridState> gridState = new NetworkVariable<GridState>();
-
     void Awake()
     {
         occupied = new bool[gridSize, gridSize];
         grid = new Cell[gridSize, gridSize];
-        //gridState.Value.cells = new ECellType[gridSize, gridSize];
-        SpawnGrid();
         GameManager.ExecuteWhenInitialized(HandleAfterInitialized);
-
-        //gridState.OnValueChanged += OnGridValueChanged;
     }
-    
+
     private void OnDestroy()
     {
         //gridState.OnValueChanged -= OnGridValueChanged;
@@ -58,66 +42,93 @@ public class GridSpawner : MonoBehaviour
         gridManager.Initialize(this);
     }
 
-    private void SpawnGrid()
+    /*    private void SpawnGrid()
+        {
+            for (int x = 0; x < gridSize; x++)
+            {
+                for (int z = 0; z < gridSize; z++)
+                {
+                    if (occupied[x, z])
+                    {
+                        continue;
+                    }
+
+                    if (UnityEngine.Random.value < islandChance && CanPlaceIsland(x, z))
+                    {
+                        PlaceIsland(x, z);
+
+                        //for (int x2 = 0; x2 < islandSize; x2++)
+                        //{
+                        //    for(int z2 = 0; z2 < islandSize; z2++)
+                        //    {
+                        //        gridState.Value.cells[x2, z2] = ECellType.Water;
+                        //    }
+                        //}
+                    }
+                    else
+                    {
+                        grid[x, z] = SpawnCell(waterCellPrefab, x, z);
+
+                        //gridState.Value.cells[x, z] = ECellType.Land;
+                    }
+                }
+            }
+
+            //gridState.Value.isSpawned = true;
+        }*/
+
+    public GridState GenerateGridState()
     {
+        GridState gridState = new GridState
+        {
+            size = gridSize,
+            cells = new byte[gridSize * gridSize],
+        };
+
+        occupied = new bool[gridSize, gridSize];
+        grid = new Cell[gridSize, gridSize];
+
         for (int x = 0; x < gridSize; x++)
         {
             for (int z = 0; z < gridSize; z++)
             {
                 if (occupied[x, z])
-                {
                     continue;
-                }
 
                 if (UnityEngine.Random.value < islandChance && CanPlaceIsland(x, z))
                 {
-                    PlaceIsland(x, z);
-
-                    //for (int x2 = 0; x2 < islandSize; x2++)
-                    //{
-                    //    for(int z2 = 0; z2 < islandSize; z2++)
-                    //    {
-                    //        gridState.Value.cells[x2, z2] = ECellType.Water;
-                    //    }
-                    //}
+                    for (int dx = 0; dx < islandSize; dx++)
+                    {
+                        for (int dz = 0; dz < islandSize; dz++)
+                        {
+                            gridState.cells[(x + dx) * gridSize + (z + dz)] = (byte)ECellType.Land;
+                            occupied[x + dx, z + dz] = true;
+                        }
+                    }
                 }
                 else
                 {
-                    grid[x, z] = SpawnCell(waterCellPrefab, x, z);
-
-                    //gridState.Value.cells[x, z] = ECellType.Land;
+                    gridState.cells[x * gridSize + z] = (byte)ECellType.Water;
+                    occupied[x, z] = true;
                 }
             }
         }
 
-        //gridState.Value.isSpawned = true;
+        return gridState;
     }
 
-    //private void OnGridValueChanged(GridState prevValue, GridState newValue)
-    //{
-    //    if (!newValue.isSpawned)
-    //    {
-    //        return;
-    //    }
-
-    //    for (int x = 0; x < gridSize; x++)
-    //    {
-    //        for (int z = 0; z < gridSize; z++)
-    //        {
-    //            ECellType cellType = gridState.Value.cells[x, z];
-    //            switch (cellType)
-    //            {
-    //                case ECellType.Water:
-    //                    grid[x, z] = SpawnCell(waterCellPrefab, x, z);
-    //                    break;
-    //                case ECellType.Land:
-    //                    grid[x, z] = SpawnCell(landCellPrefab, x, z);
-    //                    break;
-    //                default: throw new NotImplementedException(nameof(cellType));
-    //            }
-    //        }
-    //    }
-    //}
+    public void RegenerateGrid(GridState state)
+    {
+        for (int x = 0; x < state.size; x++)
+        {
+            for (int z = 0; z < state.size; z++)
+            {
+                ECellType type = (ECellType)state.cells[x * state.size + z];
+                Cell prefab = type == ECellType.Water ? waterCellPrefab : landCellPrefab;
+                grid[x, z] = SpawnCell(prefab, x, z);
+            }
+        }
+    }
 
     private Cell SpawnCell(Cell prefab, int x, int z)
     {

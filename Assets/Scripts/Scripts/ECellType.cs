@@ -1,6 +1,6 @@
 
-public enum ECellType
+public enum ECellType : byte
 {
-    Water,
-    Land,
+    Water = 0,
+    Land = 1,
 }

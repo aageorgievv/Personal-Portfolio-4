@@ -10,6 +10,7 @@ public class GameManager : NetworkBehaviour, IManager
     private static event Action onInitializedCallback;
 
     [Header("References")]
+    [SerializeField] private GridSpawner spawner;
     [SerializeField] private GridManager gridManager;
     [SerializeField] private ShipSelection shipSelection;
     [SerializeField] private UIManager uiManager;
@@ -47,7 +48,6 @@ public class GameManager : NetworkBehaviour, IManager
     private void Start()
     {
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-        NetworkManager.Singleton.OnConnectionEvent += HandleConnectionEvent;
         TryJoinAsClient();
     }
 
@@ -58,11 +58,6 @@ public class GameManager : NetworkBehaviour, IManager
         {
             StopCoroutine(waitForClientsRoutine);
         }
-    }
-
-    private void HandleConnectionEvent(NetworkManager arg1, ConnectionEventData arg2)
-    {
-        Debug.LogError($"[val] HandleConnectionEvent {arg2.EventType}");
     }
 
     public static T GetManager<T>() where T : IManager
@@ -121,7 +116,10 @@ public class GameManager : NetworkBehaviour, IManager
             yield return null;
         }
 
-        // spawn map
+        // spawn grid
+        GridState gridState = spawner.GenerateGridState();
+        spawner.RegenerateGrid(gridState);
+        SendGridClientRpc(gridState);
 
         Debug.Log($"Waiting for players to ready up");
         bool allReady = false;
@@ -133,5 +131,14 @@ public class GameManager : NetworkBehaviour, IManager
         }
 
         Debug.Log("All players ready → Start Game!");
+    }
+
+    [ClientRpc]
+    private void SendGridClientRpc(GridState state)
+    {
+        if(!IsServer)
+        {
+            spawner.RegenerateGrid(state);
+        }
     }
 }
