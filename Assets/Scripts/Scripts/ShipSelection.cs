@@ -6,7 +6,7 @@ public class ShipSelection : MonoBehaviour, IManager
     public Action<int> OnShipPlacedEvent;
 
     private Plane boardPlane;
-    private float yOffset = 0.6f;
+    private float yOffset = 0.2f;
     private int raycastDistance = 30;
     private int currentlyPlacedShips = 0;
 

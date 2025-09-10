@@ -10,6 +10,9 @@ using UnityEngine;
 
 public class GridSpawner : MonoBehaviour
 {
+    public Vector3 GridOrigin => gridOrigin;
+    public float GridSpacingOffset => gridSpacingOffset;
+
     public int GridSize => gridSize;
     public Cell[,] Cells => grid;
     //Later make a Cell abstract class and Water, Land child classes

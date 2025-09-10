@@ -9,14 +9,22 @@ public class Ship : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private int size;
-    [SerializeField] private bool isHorizontal = false;
 
+    private bool isHorizontal = true;
     private Cell currentStandingCell;
+    private GridManager gridManager;
     private Vector3 spawnPosition;
 
     private void Awake()
     {
         spawnPosition = transform.position;
+        GameManager.ExecuteWhenInitialized(HandleWhenInitialized);
+    }
+
+    private void HandleWhenInitialized()
+    {
+        gridManager = GameManager.GetManager<GridManager>();
+        ValidationUtility.ValidateReference(gridManager, nameof(gridManager));
     }
 
     public void Rotate()
@@ -28,30 +36,39 @@ public class Ship : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        Cell cell = other.gameObject.GetComponent<Cell>();
-
-        if (cell != null)
-        {
-            currentStandingCell = cell;
-        }
-    }
-
     public Cell GetNearestCell()
     {
 
-        // sphere cast
-        // get a list of cells in the sphere
-        // get the nearest one
-        // return it
+        float searchRadius = gridManager.CellSize;
 
-        // or the more common way
-        // give the ship position to the grid manager
-        // and ask the grid manager to tell you what cell that is based on math, usually (position / cellSize)
+        Collider[] hits = Physics.OverlapSphere(transform.position, searchRadius);
 
+        Cell nearestCell = null;
+        float minDistance = float.MaxValue;
 
-        return currentStandingCell;
+        foreach (Collider hit in hits)
+        {
+            Cell cell = hit.GetComponent<Cell>();
+
+            if (cell != null)
+            {
+                float distance = Vector3.Distance(transform.position, cell.transform.position);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    nearestCell = cell;
+                }
+            }
+        }
+
+        return nearestCell;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        float radius = gridManager.CellSize * 0.3f;
+        Gizmos.DrawWireSphere(transform.position, radius);
     }
 
     public void ReturnToSpawnPosition()

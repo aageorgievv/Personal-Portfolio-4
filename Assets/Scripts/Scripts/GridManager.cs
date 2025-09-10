@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour, IManager
 {
+    public Vector3 GridOrigin => gridSpawner != null ? gridSpawner.GridOrigin : Vector3.zero;
+    public float CellSize => gridSpawner != null ? gridSpawner.GridSpacingOffset : 1f;
+
     private Cell[,] grid;
     private int gridSize;
 
