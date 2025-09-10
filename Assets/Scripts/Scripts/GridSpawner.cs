@@ -1,4 +1,12 @@
+using System;
+using Unity.Netcode;
 using UnityEngine;
+
+//public class GridState : NetworkBehaviour
+//{
+//    public bool isSpawned;
+//    public ECellType[,] cells;
+//}
 
 public class GridSpawner : MonoBehaviour
 {
@@ -22,12 +30,22 @@ public class GridSpawner : MonoBehaviour
     private Cell[,] grid;
     private GridManager gridManager;
 
+    //private NetworkVariable<GridState> gridState = new NetworkVariable<GridState>();
+
     void Awake()
     {
         occupied = new bool[gridSize, gridSize];
         grid = new Cell[gridSize, gridSize];
+        //gridState.Value.cells = new ECellType[gridSize, gridSize];
         SpawnGrid();
         GameManager.ExecuteWhenInitialized(HandleAfterInitialized);
+
+        //gridState.OnValueChanged += OnGridValueChanged;
+    }
+    
+    private void OnDestroy()
+    {
+        //gridState.OnValueChanged -= OnGridValueChanged;
     }
 
     private void HandleAfterInitialized()
@@ -39,7 +57,6 @@ public class GridSpawner : MonoBehaviour
 
     private void SpawnGrid()
     {
-
         for (int x = 0; x < gridSize; x++)
         {
             for (int z = 0; z < gridSize; z++)
@@ -49,17 +66,55 @@ public class GridSpawner : MonoBehaviour
                     continue;
                 }
 
-                if (Random.value < islandChance && CanPlaceIsland(x, z))
+                if (UnityEngine.Random.value < islandChance && CanPlaceIsland(x, z))
                 {
                     PlaceIsland(x, z);
+
+                    //for (int x2 = 0; x2 < islandSize; x2++)
+                    //{
+                    //    for(int z2 = 0; z2 < islandSize; z2++)
+                    //    {
+                    //        gridState.Value.cells[x2, z2] = ECellType.Water;
+                    //    }
+                    //}
                 }
                 else
                 {
                     grid[x, z] = SpawnCell(waterCellPrefab, x, z);
+
+                    //gridState.Value.cells[x, z] = ECellType.Land;
                 }
             }
         }
+
+        //gridState.Value.isSpawned = true;
     }
+
+    //private void OnGridValueChanged(GridState prevValue, GridState newValue)
+    //{
+    //    if (!newValue.isSpawned)
+    //    {
+    //        return;
+    //    }
+
+    //    for (int x = 0; x < gridSize; x++)
+    //    {
+    //        for (int z = 0; z < gridSize; z++)
+    //        {
+    //            ECellType cellType = gridState.Value.cells[x, z];
+    //            switch (cellType)
+    //            {
+    //                case ECellType.Water:
+    //                    grid[x, z] = SpawnCell(waterCellPrefab, x, z);
+    //                    break;
+    //                case ECellType.Land:
+    //                    grid[x, z] = SpawnCell(landCellPrefab, x, z);
+    //                    break;
+    //                default: throw new NotImplementedException(nameof(cellType));
+    //            }
+    //        }
+    //    }
+    //}
 
     private Cell SpawnCell(Cell prefab, int x, int z)
     {

@@ -12,6 +12,7 @@ public class GameManager : NetworkBehaviour, IManager
     [Header("References")]
     [SerializeField] private GridManager gridManager;
     [SerializeField] private ShipSelection shipSelection;
+    [SerializeField] private UIManager uiManager;
 
     private static Dictionary<Type, IManager> managers = new Dictionary<Type, IManager>();
 
@@ -20,18 +21,23 @@ public class GameManager : NetworkBehaviour, IManager
     private bool triedAsClient = false;
 
     private float startHostDelay = 1;
+    private const int playerCount = 2;
+
+    private Coroutine waitForClientsRoutine;
 
     private void Awake()
     {
         //Validate
         ValidationUtility.ValidateReference(gridManager, nameof(gridManager));
         ValidationUtility.ValidateReference(shipSelection, nameof(shipSelection));
+        ValidationUtility.ValidateReference(uiManager, nameof(uiManager));
+
         managers.Clear();
         //Add references
         managers.Add(typeof(GameManager), this);
         managers.Add(typeof(GridManager), gridManager);
         managers.Add(typeof(ShipSelection), shipSelection);
-
+        managers.Add(typeof(UIManager), uiManager);
 
         isInitialized = true;
         onInitializedCallback?.Invoke();
@@ -41,12 +47,22 @@ public class GameManager : NetworkBehaviour, IManager
     private void Start()
     {
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+        NetworkManager.Singleton.OnConnectionEvent += HandleConnectionEvent;
         TryJoinAsClient();
     }
 
-    private void Update()
+    public override void OnDestroy()
     {
-        CheckIfAllPlayersAreReady();
+        base.OnDestroy();
+        if (waitForClientsRoutine != null)
+        {
+            StopCoroutine(waitForClientsRoutine);
+        }
+    }
+
+    private void HandleConnectionEvent(NetworkManager arg1, ConnectionEventData arg2)
+    {
+        Debug.LogError($"[val] HandleConnectionEvent {arg2.EventType}");
     }
 
     public static T GetManager<T>() where T : IManager
@@ -88,21 +104,34 @@ public class GameManager : NetworkBehaviour, IManager
         {
             Debug.Log("Becoming host now...");
             NetworkManager.Singleton.StartHost();
+            waitForClientsRoutine = StartCoroutine(CheckIfAllPlayersAreReady());
         }
     }
 
-    private void CheckIfAllPlayersAreReady()
+    private IEnumerator CheckIfAllPlayersAreReady()
     {
         if(!IsServer)
         {
-            return;
+            yield break;
         }
 
-        var allReady = NetworkManager.Singleton.ConnectedClientsList.All(c => c.PlayerObject.GetComponent<PlayerState>().IsReady.Value);
-
-        if(allReady)
+        Debug.Log($"Waiting for {playerCount} clients to join");
+        while(NetworkManager.Singleton.ConnectedClients.Count < playerCount)
         {
-            Debug.Log("All players ready → Start Game!");
+            yield return null;
         }
+
+        // spawn map
+
+        Debug.Log($"Waiting for players to ready up");
+        bool allReady = false;
+        while (!allReady)
+        {
+            // waiting until all players ready
+            allReady = NetworkManager.Singleton.ConnectedClientsList.All(c => c.PlayerObject.GetComponent<PlayerState>().IsReady.Value);
+            yield return null;
+        }
+
+        Debug.Log("All players ready → Start Game!");
     }
 }

@@ -91,7 +91,6 @@ public class ShipSelection : MonoBehaviour, IManager
             int row = anchorCell.Row + (ship.IsHorizontal ? i : 0);
             int col = anchorCell.Col + (ship.IsHorizontal ? 0 : i);
 
-            Debug.Log($"IsVertical {ship.IsHorizontal}");
             Cell cell = gridManager.GetCell(row, col);
 
             if (cell == null || cell.GetCellType() == ECellType.Land)
@@ -113,8 +112,13 @@ public class ShipSelection : MonoBehaviour, IManager
         }
         else
         {
+            if(currentlyPlacedShips > 0)
+            {
+                currentlyPlacedShips--;
+            }
+
             ship.ReturnToSpawnPosition();
-            currentlyPlacedShips--;
+            OnShipPlacedEvent?.Invoke(currentlyPlacedShips);
             Debug.LogError("Invalid placement! Outside of grid or Land");
         }
     }
