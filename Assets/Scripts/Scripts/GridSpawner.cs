@@ -42,41 +42,6 @@ public class GridSpawner : MonoBehaviour
         gridManager.Initialize(this);
     }
 
-    /*    private void SpawnGrid()
-        {
-            for (int x = 0; x < gridSize; x++)
-            {
-                for (int z = 0; z < gridSize; z++)
-                {
-                    if (occupied[x, z])
-                    {
-                        continue;
-                    }
-
-                    if (UnityEngine.Random.value < islandChance && CanPlaceIsland(x, z))
-                    {
-                        PlaceIsland(x, z);
-
-                        //for (int x2 = 0; x2 < islandSize; x2++)
-                        //{
-                        //    for(int z2 = 0; z2 < islandSize; z2++)
-                        //    {
-                        //        gridState.Value.cells[x2, z2] = ECellType.Water;
-                        //    }
-                        //}
-                    }
-                    else
-                    {
-                        grid[x, z] = SpawnCell(waterCellPrefab, x, z);
-
-                        //gridState.Value.cells[x, z] = ECellType.Land;
-                    }
-                }
-            }
-
-            //gridState.Value.isSpawned = true;
-        }*/
-
     public GridState GenerateGridState()
     {
         GridState gridState = new GridState
@@ -84,9 +49,6 @@ public class GridSpawner : MonoBehaviour
             size = gridSize,
             cells = new byte[gridSize * gridSize],
         };
-
-        occupied = new bool[gridSize, gridSize];
-        grid = new Cell[gridSize, gridSize];
 
         for (int x = 0; x < gridSize; x++)
         {
@@ -102,18 +64,15 @@ public class GridSpawner : MonoBehaviour
                         for (int dz = 0; dz < islandSize; dz++)
                         {
                             gridState.cells[(x + dx) * gridSize + (z + dz)] = (byte)ECellType.Land;
-                            occupied[x + dx, z + dz] = true;
                         }
                     }
                 }
                 else
                 {
                     gridState.cells[x * gridSize + z] = (byte)ECellType.Water;
-                    occupied[x, z] = true;
                 }
             }
         }
-
         return gridState;
     }
 
