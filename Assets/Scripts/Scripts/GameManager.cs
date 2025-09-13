@@ -130,7 +130,7 @@ public class GameManager : NetworkBehaviour, IManager
             yield return null;
         }
 
-        Debug.Log("All players ready → Start Game!");
+        Debug.LogError("All players ready → Start Game!");
     }
 
     [ClientRpc]

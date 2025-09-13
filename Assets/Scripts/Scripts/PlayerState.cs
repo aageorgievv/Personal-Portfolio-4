@@ -15,7 +15,7 @@ public class PlayerState : NetworkBehaviour
     private GameManager gameManager;
     private ShipSelection shipSelection;
 
-    private int allShipsPlaced = 5;
+    private int shipsRequired = 5;
 
     private void Awake()
     {
@@ -28,7 +28,13 @@ public class PlayerState : NetworkBehaviour
         shipSelection = GameManager.GetManager<ShipSelection>();
         ValidationUtility.ValidateReference(gameManager, nameof(gameManager));
         ValidationUtility.ValidateReference(shipSelection, nameof(shipSelection));
-        shipSelection.OnShipPlacedEvent += SetPlacedShips;
+        shipSelection.OnShipPlacedEvent += HandleShipPlacedEvent;
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        shipSelection.OnShipPlacedEvent += HandleShipPlacedEvent;
     }
 
     private void Update()
@@ -47,7 +53,7 @@ public class PlayerState : NetworkBehaviour
         }
     }
 
-    private void SetPlacedShips(int count)
+    private void HandleShipPlacedEvent(int count)
     {
         if (IsOwner)
         {
@@ -62,7 +68,7 @@ public class PlayerState : NetworkBehaviour
             SubmitReadyToServerRpc();
         }
     }
-
+    
     [ServerRpc]
     private void SubmitPlacedShipsToServerRpc(int count)
     {
@@ -72,7 +78,7 @@ public class PlayerState : NetworkBehaviour
     [ServerRpc]
     private void SubmitReadyToServerRpc()
     {
-        bool shipsPlaced = placedShips.Value == allShipsPlaced;
-        isReady.Value = shipsPlaced;
+        bool allShipsPlaced = placedShips.Value >= shipsRequired;
+        isReady.Value = allShipsPlaced;
     }
 }

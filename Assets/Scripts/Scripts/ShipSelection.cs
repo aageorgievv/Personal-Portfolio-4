@@ -108,7 +108,7 @@ public class ShipSelection : MonoBehaviour, IManager
             ship.transform.position = snapPosition;
             currentlyPlacedShips++;
             OnShipPlacedEvent?.Invoke(currentlyPlacedShips);
-            Debug.Log($"Snapped to {anchorCell.GetCellType()} at {snapPosition}");
+            //Debug.Log($"Snapped to {anchorCell.GetCellType()} at {snapPosition}");
         }
         else
         {
@@ -119,7 +119,7 @@ public class ShipSelection : MonoBehaviour, IManager
 
             ship.ReturnToSpawnPosition();
             OnShipPlacedEvent?.Invoke(currentlyPlacedShips);
-            Debug.LogError("Invalid placement! Outside of grid or Land");
+            //Debug.LogError("Invalid placement! Outside of grid or Land");
         }
     }
 }
