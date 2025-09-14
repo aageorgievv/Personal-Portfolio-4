@@ -2832,6 +2832,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2f16ffa03cd3704fad151af3fb142ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ships:
+  - {fileID: 1971768502}
+  - {fileID: 1509870387}
+  - {fileID: 501645059}
+  - {fileID: 844015426}
+  - {fileID: 1266998977}
 --- !u!1001 &1402548624
 PrefabInstance:
   m_ObjectHideFlags: 0

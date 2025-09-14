@@ -32,7 +32,7 @@ public class GridSpawner : MonoBehaviour
 
     private void OnDestroy()
     {
-        //gridState.OnValueChanged -= OnGridValueChanged;
+
     }
 
     private void HandleAfterInitialized()
@@ -97,17 +97,6 @@ public class GridSpawner : MonoBehaviour
         cell.SetCell(x, z);
 
         return cell;
-    }
-
-    private void PlaceIsland(int startX, int startZ)
-    {
-        for (int x = 0; x < islandSize; x++)
-        {
-            for (int z = 0; z < islandSize; z++)
-            {
-                grid[startX + x, startZ + z] = SpawnCell(landCellPrefab, startX + x, startZ + z);
-            }
-        }
     }
 
     private bool CanPlaceIsland(int startX, int startZ)

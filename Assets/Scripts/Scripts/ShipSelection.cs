@@ -1,10 +1,14 @@
 using System;
+using System.Collections.Generic;
+using NUnit.Framework;
 using UnityEngine;
 
 public class ShipSelection : MonoBehaviour, IManager
 {
     public Action<int> OnShipPlacedEvent;
 
+    [Header("References")]
+    [SerializeField] private Ship[] ships;
     private Plane boardPlane;
     private float yOffset = 0.2f;
     private int raycastDistance = 30;
@@ -13,15 +17,11 @@ public class ShipSelection : MonoBehaviour, IManager
     private Ship currentlyHeldShip;
     private GridManager gridManager;
 
+
     private void Awake()
     {
         boardPlane = new Plane(Vector3.up, Vector3.zero);
         GameManager.ExecuteWhenInitialized(HandleWhenInitialized);
-    }
-
-    private void OnDestroy()
-    {
-
     }
 
     private void Update()
@@ -93,7 +93,7 @@ public class ShipSelection : MonoBehaviour, IManager
 
             Cell cell = gridManager.GetCell(row, col);
 
-            if (cell == null || cell.GetCellType() == ECellType.Land)
+            if (cell == null || cell.GetCellType() == ECellType.Land || anchorCell.GetCellType() == ECellType.Land)
             {
                 isValid = false;
                 break;
@@ -109,6 +109,8 @@ public class ShipSelection : MonoBehaviour, IManager
             currentlyPlacedShips++;
             OnShipPlacedEvent?.Invoke(currentlyPlacedShips);
             //Debug.Log($"Snapped to {anchorCell.GetCellType()} at {snapPosition}");
+            Debug.Log($"Received Ship at {snapPosition} Size:{ship.Size} Horizontal:{ship.IsHorizontal}");
+
         }
         else
         {
@@ -121,5 +123,10 @@ public class ShipSelection : MonoBehaviour, IManager
             OnShipPlacedEvent?.Invoke(currentlyPlacedShips);
             //Debug.LogError("Invalid placement! Outside of grid or Land");
         }
+    }
+
+    public Ship[] GetAllShips()
+    {
+        return ships;
     }
 }

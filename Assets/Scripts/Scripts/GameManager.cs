@@ -131,6 +131,7 @@ public class GameManager : NetworkBehaviour, IManager
         }
 
         Debug.LogError("All players ready → Start Game!");
+        //Send positions of the ships to each client
     }
 
     [ClientRpc]

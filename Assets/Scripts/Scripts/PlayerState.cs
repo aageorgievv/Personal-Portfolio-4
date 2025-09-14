@@ -1,6 +1,6 @@
-using System;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class PlayerState : NetworkBehaviour
 {
@@ -11,6 +11,8 @@ public class PlayerState : NetworkBehaviour
 
     private NetworkVariable<int> placedShips = new NetworkVariable<int>(0);
     private NetworkVariable<bool> isReady = new NetworkVariable<bool>(false);
+
+    public NetworkList<ShipPlacementStruct> Ships { get; private set; } = new NetworkList<ShipPlacementStruct>();
 
     private GameManager gameManager;
     private ShipSelection shipSelection;
@@ -34,7 +36,7 @@ public class PlayerState : NetworkBehaviour
     public override void OnDestroy()
     {
         base.OnDestroy();
-        shipSelection.OnShipPlacedEvent += HandleShipPlacedEvent;
+        shipSelection.OnShipPlacedEvent -= HandleShipPlacedEvent;
     }
 
     private void Update()
@@ -47,10 +49,17 @@ public class PlayerState : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        if (IsServer)
+        {
+            Ships = new NetworkList<ShipPlacementStruct>();
+        }
+
         if (IsOwner)
         {
             localPlayer = this;
         }
+
+        Ships.OnListChanged += HandleOnShipsListChanged;
     }
 
     private void HandleShipPlacedEvent(int count)
@@ -66,9 +75,10 @@ public class PlayerState : NetworkBehaviour
         if (IsOwner)
         {
             SubmitReadyToServerRpc();
+            SendShipsToServer();
         }
     }
-    
+
     [ServerRpc]
     private void SubmitPlacedShipsToServerRpc(int count)
     {
@@ -80,5 +90,50 @@ public class PlayerState : NetworkBehaviour
     {
         bool allShipsPlaced = placedShips.Value >= shipsRequired;
         isReady.Value = allShipsPlaced;
+    }
+
+    [ServerRpc]
+    private void SubmitShipsToServerRpc(ShipPlacementStruct[] ships)
+    {
+        Ships.Clear();
+
+        foreach (var ship in ships)
+        {
+            Ships.Add(ship);
+        }
+
+        placedShips.Value = Ships.Count;
+    }
+
+    private void SendShipsToServer()
+    {
+        if (!IsOwner)
+        {
+            return;
+        }
+
+        Ship[] playerShips = shipSelection.GetAllShips();
+        ShipPlacementStruct[] placements = new ShipPlacementStruct[playerShips.Length];
+
+        for (int i = 0; i < playerShips.Length; i++)
+        {
+            Cell anchorCell = playerShips[i].GetNearestCell();
+            placements[i] = new ShipPlacementStruct
+            {
+                x = anchorCell.Row,
+                y = anchorCell.Col,
+                size = playerShips[i].Size,
+                horizontal = playerShips[i].IsHorizontal
+            };
+        }
+        SubmitShipsToServerRpc(placements);
+    }
+
+    private void HandleOnShipsListChanged(NetworkListEvent<ShipPlacementStruct> changeEvent)
+    {
+        foreach (var ship in Ships)
+        {
+            Debug.LogError($"Received Ship at ({ship.x},{ship.y}) Size:{ship.size} Horizontal:{ship.horizontal}");
+        }
     }
 }
