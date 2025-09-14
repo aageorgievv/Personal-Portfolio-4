@@ -37,6 +37,7 @@ public class PlayerState : NetworkBehaviour
     {
         base.OnDestroy();
         shipSelection.OnShipPlacedEvent -= HandleShipPlacedEvent;
+        Ships.OnListChanged -= HandleOnShipsListChanged;
     }
 
     private void Update()
@@ -131,9 +132,12 @@ public class PlayerState : NetworkBehaviour
 
     private void HandleOnShipsListChanged(NetworkListEvent<ShipPlacementStruct> changeEvent)
     {
-        foreach (var ship in Ships)
+        if(!IsOwner)
         {
-            Debug.LogError($"Received Ship at ({ship.x},{ship.y}) Size:{ship.size} Horizontal:{ship.horizontal}");
+            foreach (var ship in Ships)
+            {
+                Debug.LogError($"Received Ship at ({ship.x},{ship.y}) Size:{ship.size} Horizontal:{ship.horizontal}");
+            }
         }
     }
 }
