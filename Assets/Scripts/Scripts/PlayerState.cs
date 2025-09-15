@@ -132,12 +132,76 @@ public class PlayerState : NetworkBehaviour
 
     private void HandleOnShipsListChanged(NetworkListEvent<ShipPlacementStruct> changeEvent)
     {
-        if(!IsOwner)
+        if (!IsOwner)
         {
             foreach (var ship in Ships)
             {
                 Debug.LogError($"Received Ship at ({ship.x},{ship.y}) Size:{ship.size} Horizontal:{ship.horizontal}");
             }
         }
+    }
+
+    public void AttackCell(int row, int col)
+    {
+        AttackServerRpc(row, col);
+    }
+
+    [ServerRpc]
+    private void AttackServerRpc(int row, int col, ServerRpcParams rpcParams = default)
+    {
+        ulong attackerId = rpcParams.Receive.SenderClientId;
+        ulong defenderId = GetOpponentClientId(attackerId);
+
+        PlayerState defender = NetworkManager.Singleton.ConnectedClients[defenderId].PlayerObject.GetComponent<PlayerState>();
+
+        bool isHit = false;
+        foreach (var ship in defender.Ships)
+        {
+            if (ship.horizontal)
+            {
+                if (col == ship.y && row >= ship.x && row < ship.x + ship.size)
+                    isHit = true;
+            }
+            else
+            {
+                if (row == ship.x && col >= ship.y && col < ship.y + ship.size)
+                    isHit = true;
+            }
+        }
+
+        AttackResultClientRpc(row, col, isHit, new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams { TargetClientIds = new[] { attackerId } }
+        });
+
+        AttackResultClientRpc(row, col, isHit, new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams { TargetClientIds = new[] { defenderId } }
+        });
+    }
+
+    [ClientRpc]
+    private void AttackResultClientRpc(int row, int col, bool hit, ClientRpcParams clientRpcParams = default)
+    {
+        GridManager grid = GameManager.GetManager<GridManager>();
+        Cell attackedCell = grid.GetCell(row, col);
+
+        if (attackedCell != null)
+        {
+            attackedCell.SetAttackResult(hit);
+        }
+    }
+
+    private ulong GetOpponentClientId(ulong attackerId)
+    {
+        foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
+        {
+            if (kvp.Key != attackerId)
+            {
+                return kvp.Key;
+            }
+        }
+        Debug.LogError("No opponent found!");
+        return attackerId; 
     }
 }

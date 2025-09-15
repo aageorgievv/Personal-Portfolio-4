@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GridManager : MonoBehaviour, IManager
@@ -24,5 +25,18 @@ public class GridManager : MonoBehaviour, IManager
 
         }
         return grid[row, col];
+    }
+
+    public Cell[] GetAllCells()
+    {
+        List<Cell> list = new List<Cell>();
+        for (int r = 0; r < gridSize; r++)
+        {
+            for (int c = 0; c < gridSize; c++)
+            {
+                list.Add(grid[r, c]);
+            }
+        }
+        return list.ToArray();
     }
 }

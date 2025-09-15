@@ -106,7 +106,11 @@ public class ShipSelection : MonoBehaviour, IManager
         {
             Vector3 snapPosition = new Vector3(anchorCell.transform.position.x, yOffset, anchorCell.transform.position.z);
             ship.transform.position = snapPosition;
-            currentlyPlacedShips++;
+            if (!ship.IsPlaced)
+            {
+                currentlyPlacedShips++;
+                ship.IsPlaced = true;
+            }
             OnShipPlacedEvent?.Invoke(currentlyPlacedShips);
             //Debug.Log($"Snapped to {anchorCell.GetCellType()} at {snapPosition}");
             Debug.Log($"Received Ship at {snapPosition} Size:{ship.Size} Horizontal:{ship.IsHorizontal}");
@@ -114,9 +118,10 @@ public class ShipSelection : MonoBehaviour, IManager
         }
         else
         {
-            if(currentlyPlacedShips > 0)
+            if (ship.IsPlaced)
             {
                 currentlyPlacedShips--;
+                ship.IsPlaced = false;
             }
 
             ship.ReturnToSpawnPosition();

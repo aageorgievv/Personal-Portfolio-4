@@ -5,6 +5,8 @@ public class Ship : MonoBehaviour
     public int Size => size;
     public bool IsHorizontal => isHorizontal;
 
+    public bool IsPlaced { get; set; } = false;
+
     [Header("References")]
 
     [Header("Settings")]

@@ -131,7 +131,13 @@ public class GameManager : NetworkBehaviour, IManager
         }
 
         Debug.LogError("All players ready → Start Game!");
-        //Send positions of the ships to each client
+
+        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            PlayerState player = client.PlayerObject.GetComponent<PlayerState>();
+            // Opponent cells are attackable
+            EnableOpponentCells(player);
+        }
     }
 
     [ClientRpc]
@@ -140,6 +146,20 @@ public class GameManager : NetworkBehaviour, IManager
         if(!IsServer)
         {
             spawner.RegenerateGrid(state);
+        }
+    }
+
+    private void EnableOpponentCells(PlayerState player)
+    {
+        GridManager grid = GetManager<GridManager>();
+
+        foreach (var cell in grid.GetAllCells()) // Add GetAllCells() to GridManager
+        {
+            // Only opponent cells are attackable
+            if (cell.OwnerId != player.OwnerClientId)
+            {
+                cell.EnableAttackMode();
+            }
         }
     }
 }
