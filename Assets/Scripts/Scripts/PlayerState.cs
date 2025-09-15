@@ -50,7 +50,7 @@ public class PlayerState : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (IsServer)
+        if (Ships == null)
         {
             Ships = new NetworkList<ShipPlacementStruct>();
         }
@@ -146,7 +146,7 @@ public class PlayerState : NetworkBehaviour
         AttackServerRpc(row, col);
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void AttackServerRpc(int row, int col, ServerRpcParams rpcParams = default)
     {
         ulong attackerId = rpcParams.Receive.SenderClientId;
@@ -202,6 +202,6 @@ public class PlayerState : NetworkBehaviour
             }
         }
         Debug.LogError("No opponent found!");
-        return attackerId; 
+        return attackerId;
     }
 }

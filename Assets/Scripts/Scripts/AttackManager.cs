@@ -12,12 +12,14 @@ public class AttackManager : MonoBehaviour, IManager
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && PlayerState.localPlayer != null)
         {
             Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
+
             if (Physics.Raycast(ray, out RaycastHit hit, raycastDistance))
             {
                 Cell cell = hit.collider.GetComponent<Cell>();
+
                 if (cell != null && cell.IsAttackable)
                 {
                     PlayerState.localPlayer.AttackCell(cell.Row, cell.Col);

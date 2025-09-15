@@ -134,9 +134,8 @@ public class GameManager : NetworkBehaviour, IManager
 
         foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
         {
-            PlayerState player = client.PlayerObject.GetComponent<PlayerState>();
             // Opponent cells are attackable
-            EnableOpponentCells(player);
+            EnableOpponentCellsClientRpc(client.ClientId);
         }
     }
 
@@ -149,14 +148,14 @@ public class GameManager : NetworkBehaviour, IManager
         }
     }
 
-    private void EnableOpponentCells(PlayerState player)
+    [ClientRpc]
+    private void EnableOpponentCellsClientRpc(ulong playerId)
     {
         GridManager grid = GetManager<GridManager>();
 
-        foreach (var cell in grid.GetAllCells()) // Add GetAllCells() to GridManager
+        foreach (var cell in grid.GetAllCells()) 
         {
-            // Only opponent cells are attackable
-            if (cell.OwnerId != player.OwnerClientId)
+            if (cell.OwnerId != playerId)
             {
                 cell.EnableAttackMode();
             }
