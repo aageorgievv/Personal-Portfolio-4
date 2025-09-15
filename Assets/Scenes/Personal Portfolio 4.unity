@@ -57741,7 +57741,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3086192795121574ebbb81eedfc9c1bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  raycastDistance: 100
 --- !u!1001 &1836495407
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -68936,6 +68935,10 @@ PrefabInstance:
       propertyPath: shipSelection
       value: 
       objectReference: {fileID: 1273949926}
+    - target: {fileID: 2797867076842505604, guid: 65d5cf70a014ea14db2e620c21d0ed4a, type: 3}
+      propertyPath: attacksManager
+      value: 
+      objectReference: {fileID: 1834062975}
     - target: {fileID: 5659991556788615326, guid: 65d5cf70a014ea14db2e620c21d0ed4a, type: 3}
       propertyPath: m_Name
       value: GameManager

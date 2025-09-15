@@ -178,6 +178,10 @@ public class PlayerState : NetworkBehaviour
         {
             Send = new ClientRpcSendParams { TargetClientIds = new[] { defenderId } }
         });
+
+        ulong nextPlayerId = GetOpponentClientId(attackerId);
+        gameManager.CurrentTurnPlayerId.Value = nextPlayerId;
+        gameManager.UpdateTurnClientRpc(nextPlayerId);
     }
 
     [ClientRpc]

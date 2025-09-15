@@ -14,8 +14,11 @@ public class GameManager : NetworkBehaviour, IManager
     [SerializeField] private GridManager gridManager;
     [SerializeField] private ShipSelection shipSelection;
     [SerializeField] private UIManager uiManager;
+    [SerializeField] private AttackManager attacksManager;
 
     private static Dictionary<Type, IManager> managers = new Dictionary<Type, IManager>();
+
+    public NetworkVariable<ulong> CurrentTurnPlayerId = new NetworkVariable<ulong>();
 
     private static bool isInitialized;
 
@@ -32,6 +35,7 @@ public class GameManager : NetworkBehaviour, IManager
         ValidationUtility.ValidateReference(gridManager, nameof(gridManager));
         ValidationUtility.ValidateReference(shipSelection, nameof(shipSelection));
         ValidationUtility.ValidateReference(uiManager, nameof(uiManager));
+        ValidationUtility.ValidateReference(attacksManager, nameof(attacksManager));
 
         managers.Clear();
         //Add references
@@ -39,6 +43,7 @@ public class GameManager : NetworkBehaviour, IManager
         managers.Add(typeof(GridManager), gridManager);
         managers.Add(typeof(ShipSelection), shipSelection);
         managers.Add(typeof(UIManager), uiManager);
+        managers.Add(typeof(AttackManager), attacksManager);
 
         isInitialized = true;
         onInitializedCallback?.Invoke();
@@ -137,6 +142,9 @@ public class GameManager : NetworkBehaviour, IManager
             // Opponent cells are attackable
             EnableOpponentCellsClientRpc(client.ClientId);
         }
+
+        CurrentTurnPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[0].ClientId;
+        UpdateTurnClientRpc(CurrentTurnPlayerId.Value);
     }
 
     [ClientRpc]
@@ -160,5 +168,12 @@ public class GameManager : NetworkBehaviour, IManager
                 cell.EnableAttackMode();
             }
         }
+    }
+
+    [ClientRpc]
+    public void UpdateTurnClientRpc(ulong playerId)
+    {
+        AttackManager attackManager = GameManager.GetManager<AttackManager>();
+        attackManager.SetActivePlayerTurn(playerId);
     }
 }
