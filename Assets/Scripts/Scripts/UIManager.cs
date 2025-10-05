@@ -8,6 +8,8 @@ public class UIManager : MonoBehaviour, IManager
     [Header("References")]
     [SerializeField] private Button readyButton;
     [SerializeField] private TMP_Text readyButtonText;
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private TMP_Text gameOverText;
 
     private ShipSelection shipSelection;
 
@@ -37,5 +39,11 @@ public class UIManager : MonoBehaviour, IManager
         {
             readyButtonText.text = $"{placedShips}/5";
         }
+    }
+
+    public void ShowGameOver(bool isWinner)
+    {
+        gameOverPanel.SetActive(true);
+        gameOverText.text = isWinner ? "You Win!" : "You Lose!";
     }
 }
