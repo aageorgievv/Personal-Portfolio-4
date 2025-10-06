@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -12,12 +13,15 @@ public class PlayerState : NetworkBehaviour
     private NetworkVariable<int> placedShips = new NetworkVariable<int>(0);
     private NetworkVariable<bool> isReady = new NetworkVariable<bool>(false);
 
-    public NetworkList<ShipPlacementStruct> Ships { get; private set; } = new NetworkList<ShipPlacementStruct>();
+    public NetworkList<ShipPlacementData> Ships { get; private set; } = new NetworkList<ShipPlacementData>();
 
     private GameManager gameManager;
     private ShipSelection shipSelection;
 
     private int shipsRequired = 5;
+
+    private readonly List<Color> attackedCells = new List<Color>();
+
 
     private void Awake()
     {
@@ -52,7 +56,7 @@ public class PlayerState : NetworkBehaviour
     {
         if (Ships == null)
         {
-            Ships = new NetworkList<ShipPlacementStruct>();
+            Ships = new NetworkList<ShipPlacementData>();
         }
 
         if (IsOwner)
@@ -94,7 +98,7 @@ public class PlayerState : NetworkBehaviour
     }
 
     [ServerRpc]
-    private void SubmitShipsToServerRpc(ShipPlacementStruct[] ships)
+    private void SubmitShipsToServerRpc(ShipPlacementData[] ships)
     {
         Ships.Clear();
 
@@ -114,12 +118,12 @@ public class PlayerState : NetworkBehaviour
         }
 
         Ship[] playerShips = shipSelection.GetAllShips();
-        ShipPlacementStruct[] placements = new ShipPlacementStruct[playerShips.Length];
+        ShipPlacementData[] placements = new ShipPlacementData[playerShips.Length];
 
         for (int i = 0; i < playerShips.Length; i++)
         {
             Cell anchorCell = playerShips[i].GetNearestCell();
-            placements[i] = new ShipPlacementStruct
+            placements[i] = new ShipPlacementData
             {
                 x = anchorCell.Row,
                 y = anchorCell.Col,
@@ -130,7 +134,7 @@ public class PlayerState : NetworkBehaviour
         SubmitShipsToServerRpc(placements);
     }
 
-    private void HandleOnShipsListChanged(NetworkListEvent<ShipPlacementStruct> changeEvent)
+    private void HandleOnShipsListChanged(NetworkListEvent<ShipPlacementData> changeEvent)
     {
         if (!IsOwner)
         {
@@ -144,7 +148,23 @@ public class PlayerState : NetworkBehaviour
     public void AttackCell(int row, int col)
     {
         AttackServerRpc(row, col);
+        SaveOwnGrid();
     }
+
+    public void UpdateOwnGrid()
+    {
+        GridManager grid = GameManager.GetManager<GridManager>();
+        Cell[] cells = grid.GetAllCells();
+
+        for (int i = 0; i < attackedCells.Count; i++)
+        {
+            Color color = attackedCells[i];
+            cells[i].SetColor(color);
+        }
+
+        // disable our ships 
+    }
+
 
     [ServerRpc(RequireOwnership = false)]
     private void AttackServerRpc(int row, int col, ServerRpcParams rpcParams = default)
@@ -179,9 +199,23 @@ public class PlayerState : NetworkBehaviour
             Send = new ClientRpcSendParams { TargetClientIds = new[] { defenderId } }
         });
 
+        // enable our ships 
+
         ulong nextPlayerId = GetOpponentClientId(attackerId);
         gameManager.CurrentTurnPlayerId.Value = nextPlayerId;
         gameManager.UpdateTurnClientRpc(nextPlayerId);
+    }
+
+    public void SaveOwnGrid()
+    {
+        GridManager grid = GameManager.GetManager<GridManager>();
+        Cell[] cells = grid.GetAllCells();
+
+        attackedCells.Clear();
+        foreach (Cell cell in cells)
+        {
+            attackedCells.Add(cell.HitColor);
+        }
     }
 
     [ClientRpc]
@@ -207,5 +241,37 @@ public class PlayerState : NetworkBehaviour
         }
         Debug.LogError("No opponent found!");
         return attackerId;
+    }
+
+    public void SetAttackMode()
+    {
+        Ship[] ships = shipSelection.GetAllShips();
+        foreach (var ship in ships)
+        {
+            ship.HideVisual();
+        }
+
+        // Allow attacks on opponent’s grid
+        GridManager grid = GameManager.GetManager<GridManager>();
+        foreach (var cell in grid.GetAllCells())
+        {
+            if (cell.OwnerId != OwnerClientId)
+            {
+                cell.EnableAttackMode();
+            }
+        }
+
+        Debug.LogError("Switched to Attack mode");
+    }
+
+    public void SetDefenseMode()
+    {
+        Ship[] ships = shipSelection.GetAllShips();
+        foreach (var ship in ships)
+        {
+            ship.ShowVisual();
+        }
+
+        Debug.LogError("Switched to Defense mode");
     }
 }

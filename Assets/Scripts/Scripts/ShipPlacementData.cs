@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine.UIElements;
 
 [System.Serializable]
-public struct ShipPlacementStruct : INetworkSerializable, System.IEquatable<ShipPlacementStruct>
+public struct ShipPlacementData : INetworkSerializable, System.IEquatable<ShipPlacementData>
 {
     public int x;
     public int y;
@@ -17,7 +17,7 @@ public struct ShipPlacementStruct : INetworkSerializable, System.IEquatable<Ship
         serializer.SerializeValue(ref horizontal);
     }
 
-    public bool Equals(ShipPlacementStruct other)
+    public bool Equals(ShipPlacementData other)
     {
         return x == other.x &&
         y == other.y &&

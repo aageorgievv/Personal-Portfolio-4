@@ -63,6 +63,8 @@ public class GameManager : NetworkBehaviour, IManager
         {
             StopCoroutine(waitForClientsRoutine);
         }
+
+        NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
     }
 
     public static T GetManager<T>() where T : IManager
@@ -110,21 +112,28 @@ public class GameManager : NetworkBehaviour, IManager
 
     private IEnumerator CheckIfAllPlayersAreReady()
     {
-        if(!IsServer)
+        if (!IsServer)
         {
             yield break;
         }
 
         Debug.Log($"Waiting for {playerCount} clients to join");
-        while(NetworkManager.Singleton.ConnectedClients.Count < playerCount)
+        while (NetworkManager.Singleton.ConnectedClients.Count < playerCount)
         {
             yield return null;
         }
 
         // spawn grid
         GridState gridState = spawner.GenerateGridState();
+
         spawner.RegenerateGrid(gridState);
         SendGridClientRpc(gridState);
+
+        IEnumerable<PlayerState> playerStates = NetworkManager.ConnectedClients.Select(c => c.Value.PlayerObject.GetComponent<PlayerState>());
+        foreach (PlayerState playerState in playerStates)
+        {
+            playerState.SaveOwnGrid();
+        }
 
         Debug.Log($"Waiting for players to ready up");
         bool allReady = false;
@@ -139,7 +148,6 @@ public class GameManager : NetworkBehaviour, IManager
 
         foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
         {
-            // Opponent cells are attackable
             EnableOpponentCellsClientRpc(client.ClientId);
         }
 
@@ -150,7 +158,7 @@ public class GameManager : NetworkBehaviour, IManager
     [ClientRpc]
     private void SendGridClientRpc(GridState state)
     {
-        if(!IsServer)
+        if (!IsServer)
         {
             spawner.RegenerateGrid(state);
         }
@@ -161,7 +169,7 @@ public class GameManager : NetworkBehaviour, IManager
     {
         GridManager grid = GetManager<GridManager>();
 
-        foreach (var cell in grid.GetAllCells()) 
+        foreach (var cell in grid.GetAllCells())
         {
             if (cell.OwnerId != playerId)
             {
@@ -175,5 +183,25 @@ public class GameManager : NetworkBehaviour, IManager
     {
         AttackManager attackManager = GameManager.GetManager<AttackManager>();
         attackManager.SetActivePlayerTurn(playerId);
+
+        /*        PlayerState playerState = NetworkManager.ConnectedClients.Select(c => c.Value.PlayerObject.GetComponent<PlayerState>()).FirstOrDefault(state => state.OwnerClientId == playerId);
+                playerState.UpdateOwnGrid();*/
+
+        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        {
+            var state = client.PlayerObject.GetComponent<PlayerState>();
+
+            if (state.IsOwner)
+            {
+                if (state.OwnerClientId == playerId)
+                {
+                    state.SetAttackMode();
+                }
+                else
+                {
+                    state.SetDefenseMode();
+                }
+            }
+        }
     }
 }

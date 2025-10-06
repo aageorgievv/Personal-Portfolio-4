@@ -81,4 +81,20 @@ public class Ship : MonoBehaviour
     {
         Destroy(gameObject);
     }
+
+    public void HideVisual()
+    {
+        foreach (var renderer in GetComponentsInChildren<Renderer>())
+        {
+            renderer.enabled = false;
+        }
+    }
+
+    public void ShowVisual()
+    {
+        foreach (var renderer in GetComponentsInChildren<Renderer>())
+        {
+            renderer.enabled = true;
+        }
+    }
 }
