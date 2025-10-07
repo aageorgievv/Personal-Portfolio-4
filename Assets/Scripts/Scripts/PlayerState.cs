@@ -20,8 +20,8 @@ public class PlayerState : NetworkBehaviour
 
     private int shipsRequired = 5;
 
-    private readonly List<Color> attackedCells = new List<Color>();
-
+    private readonly List<(int row, int col, Color color)> attackHistory = new();
+    private readonly List<(int row, int col, Color color)> defenseHistory = new();
 
     private void Awake()
     {
@@ -148,21 +148,70 @@ public class PlayerState : NetworkBehaviour
     public void AttackCell(int row, int col)
     {
         AttackServerRpc(row, col);
-        SaveOwnGrid();
     }
 
-    public void UpdateOwnGrid()
+    public void UpdateOwnGrid(bool isAttackMode)
     {
         GridManager grid = GameManager.GetManager<GridManager>();
         Cell[] cells = grid.GetAllCells();
 
-        for (int i = 0; i < attackedCells.Count; i++)
+        foreach (Cell cell in cells)
         {
-            Color color = attackedCells[i];
-            cells[i].SetColor(color);
+            cell.SetColor(Color.blue);
         }
 
-        // disable our ships 
+        if(isAttackMode)
+        {
+            Debug.LogError($"Client {OwnerClientId} UpdateOwnGrid attack");
+
+            foreach (var entry in attackHistory)
+            {
+                Cell cell = grid.GetCell(entry.row, entry.col);
+                cell?.SetColor(entry.color);
+            }
+        } else
+        {
+            Debug.LogError($"Client {OwnerClientId} UpdateOwnGrid defense");
+
+            foreach (var entry in defenseHistory)
+            {
+                Cell cell = grid.GetCell(entry.row, entry.col);
+                cell?.SetColor(entry.color);
+            }
+        }
+    }
+
+    public void SaveAttackGrid()
+    {
+        Debug.LogError($"Client {OwnerClientId} SaveAttackGrid");
+        GridManager grid = GameManager.GetManager<GridManager>();
+        Cell[] cells = grid.GetAllCells();
+
+        attackHistory.Clear();
+        foreach (Cell cell in cells)
+        {
+            if (cell.HitColor == Color.red || cell.HitColor == Color.white)
+            {
+                attackHistory.Add((cell.Row, cell.Col, cell.HitColor));
+            }
+        }
+    }
+
+    public void SaveDefenseGrid()
+    {
+        Debug.LogError($"Client {OwnerClientId} SaveDefenseGrid");
+
+        GridManager grid = GameManager.GetManager<GridManager>();
+        Cell[] cells = grid.GetAllCells();
+
+        defenseHistory.Clear();
+        foreach (Cell cell in cells)
+        {
+            if (cell.HitColor == Color.red || cell.HitColor == Color.white)
+            {
+                defenseHistory.Add((cell.Row, cell.Col, cell.HitColor));
+            }
+        }
     }
 
 
@@ -188,45 +237,32 @@ public class PlayerState : NetworkBehaviour
                     isHit = true;
             }
         }
-
-        AttackResultClientRpc(row, col, isHit, new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams { TargetClientIds = new[] { attackerId } }
-        });
-
-        AttackResultClientRpc(row, col, isHit, new ClientRpcParams
-        {
-            Send = new ClientRpcSendParams { TargetClientIds = new[] { defenderId } }
-        });
-
-        // enable our ships 
+        AttackResultClientRpc(row, col, isHit, attackerId);
 
         ulong nextPlayerId = GetOpponentClientId(attackerId);
         gameManager.CurrentTurnPlayerId.Value = nextPlayerId;
         gameManager.UpdateTurnClientRpc(nextPlayerId);
     }
 
-    public void SaveOwnGrid()
-    {
-        GridManager grid = GameManager.GetManager<GridManager>();
-        Cell[] cells = grid.GetAllCells();
-
-        attackedCells.Clear();
-        foreach (Cell cell in cells)
-        {
-            attackedCells.Add(cell.HitColor);
-        }
-    }
-
     [ClientRpc]
-    private void AttackResultClientRpc(int row, int col, bool hit, ClientRpcParams clientRpcParams = default)
+    private void AttackResultClientRpc(int row, int col, bool hit, ulong attackerId)
     {
+        Debug.LogError($"[val] Client {attackerId} attacks");
+
         GridManager grid = GameManager.GetManager<GridManager>();
         Cell attackedCell = grid.GetCell(row, col);
 
         if (attackedCell != null)
         {
             attackedCell.SetAttackResult(hit);
+
+            if(attackerId == OwnerClientId)
+            {
+                SaveAttackGrid();
+            } else
+            {
+                SaveDefenseGrid();
+            }
         }
     }
 
@@ -251,17 +287,13 @@ public class PlayerState : NetworkBehaviour
             ship.HideVisual();
         }
 
-        // Allow attacks on opponent’s grid
         GridManager grid = GameManager.GetManager<GridManager>();
         foreach (var cell in grid.GetAllCells())
         {
-            if (cell.OwnerId != OwnerClientId)
-            {
-                cell.EnableAttackMode();
-            }
+            cell.EnableAttackMode();
         }
 
-        Debug.LogError("Switched to Attack mode");
+        Debug.Log("Switched to Attack mode");
     }
 
     public void SetDefenseMode()
@@ -272,6 +304,6 @@ public class PlayerState : NetworkBehaviour
             ship.ShowVisual();
         }
 
-        Debug.LogError("Switched to Defense mode");
+        Debug.Log("Switched to Defense mode");
     }
 }

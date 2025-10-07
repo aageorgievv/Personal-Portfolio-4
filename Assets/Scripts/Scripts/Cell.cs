@@ -3,7 +3,6 @@ using UnityEngine;
 public class Cell : MonoBehaviour
 {
     public Color HitColor { get; private set; } = Color.blue;
-    public ulong OwnerId { get; set; }
     public int Row {  get; private set; }
     public int Col { get; private set; }
 

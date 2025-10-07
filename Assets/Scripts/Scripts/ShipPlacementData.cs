@@ -19,9 +19,6 @@ public struct ShipPlacementData : INetworkSerializable, System.IEquatable<ShipPl
 
     public bool Equals(ShipPlacementData other)
     {
-        return x == other.x &&
-        y == other.y &&
-               size == other.size &&
-               horizontal == other.horizontal;
+        return x == other.x && y == other.y && size == other.size && horizontal == other.horizontal;
     }
 }

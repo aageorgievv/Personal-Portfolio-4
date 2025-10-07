@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class GameManager : NetworkBehaviour, IManager
 {
+    public bool IsGameStarted => isGameStarted.Value;
+
     private static event Action onInitializedCallback;
 
     [Header("References")]
@@ -19,9 +21,9 @@ public class GameManager : NetworkBehaviour, IManager
     private static Dictionary<Type, IManager> managers = new Dictionary<Type, IManager>();
 
     public NetworkVariable<ulong> CurrentTurnPlayerId = new NetworkVariable<ulong>();
+    private NetworkVariable<bool> isGameStarted = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private static bool isInitialized;
-
     private bool triedAsClient = false;
 
     private float startHostDelay = 1;
@@ -63,8 +65,6 @@ public class GameManager : NetworkBehaviour, IManager
         {
             StopCoroutine(waitForClientsRoutine);
         }
-
-        NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
     }
 
     public static T GetManager<T>() where T : IManager
@@ -132,7 +132,7 @@ public class GameManager : NetworkBehaviour, IManager
         IEnumerable<PlayerState> playerStates = NetworkManager.ConnectedClients.Select(c => c.Value.PlayerObject.GetComponent<PlayerState>());
         foreach (PlayerState playerState in playerStates)
         {
-            playerState.SaveOwnGrid();
+            playerState.SaveAttackGrid();
         }
 
         Debug.Log($"Waiting for players to ready up");
@@ -145,11 +145,7 @@ public class GameManager : NetworkBehaviour, IManager
         }
 
         Debug.LogError("All players ready → Start Game!");
-
-        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
-        {
-            EnableOpponentCellsClientRpc(client.ClientId);
-        }
+        isGameStarted.Value = true;
 
         CurrentTurnPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[0].ClientId;
         UpdateTurnClientRpc(CurrentTurnPlayerId.Value);
@@ -161,20 +157,6 @@ public class GameManager : NetworkBehaviour, IManager
         if (!IsServer)
         {
             spawner.RegenerateGrid(state);
-        }
-    }
-
-    [ClientRpc]
-    private void EnableOpponentCellsClientRpc(ulong playerId)
-    {
-        GridManager grid = GetManager<GridManager>();
-
-        foreach (var cell in grid.GetAllCells())
-        {
-            if (cell.OwnerId != playerId)
-            {
-                cell.EnableAttackMode();
-            }
         }
     }
 
@@ -196,10 +178,12 @@ public class GameManager : NetworkBehaviour, IManager
                 if (state.OwnerClientId == playerId)
                 {
                     state.SetAttackMode();
+                    state.UpdateOwnGrid(true);
                 }
                 else
                 {
                     state.SetDefenseMode();
+                    state.UpdateOwnGrid(false);
                 }
             }
         }

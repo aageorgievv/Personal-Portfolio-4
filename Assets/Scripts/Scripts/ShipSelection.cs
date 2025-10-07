@@ -16,7 +16,7 @@ public class ShipSelection : MonoBehaviour, IManager
 
     private Ship currentlyHeldShip;
     private GridManager gridManager;
-
+    private GameManager gameManager;
 
     private void Awake()
     {
@@ -26,11 +26,17 @@ public class ShipSelection : MonoBehaviour, IManager
 
     private void Update()
     {
+        if(gameManager != null && gameManager.IsGameStarted)
+        {
+            return;
+        }
+
         UpdateMouseLeft();
     }
 
     private void HandleWhenInitialized()
     {
+        gameManager = GameManager.GetManager<GameManager>();
         gridManager = GameManager.GetManager<GridManager>();
         ValidationUtility.ValidateReference(gridManager, nameof(gridManager));
     }
