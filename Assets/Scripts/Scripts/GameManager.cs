@@ -145,6 +145,7 @@ public class GameManager : NetworkBehaviour, IManager
         }
 
         Debug.LogError("All players ready → Start Game!");
+        uiManager.DisableReadyButton();
         isGameStarted.Value = true;
 
         CurrentTurnPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[0].ClientId;

@@ -41,6 +41,11 @@ public class UIManager : MonoBehaviour, IManager
         }
     }
 
+    public void DisableReadyButton()
+    {
+        readyButton.gameObject.SetActive(false);
+    }
+
     public void ShowGameOver(bool isWinner)
     {
         gameOverPanel.SetActive(true);

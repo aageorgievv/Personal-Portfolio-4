@@ -122,3 +122,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cellType: 0
+  waterMaterial: {fileID: 2100000, guid: e361288fa92a7374ca6aeb399f4e75b5, type: 2}

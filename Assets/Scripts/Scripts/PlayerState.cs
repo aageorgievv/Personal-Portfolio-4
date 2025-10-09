@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
@@ -157,7 +158,10 @@ public class PlayerState : NetworkBehaviour
 
         foreach (Cell cell in cells)
         {
-            cell.SetColor(Color.blue);
+            if(cell.GetCellType() != ECellType.Land)
+            {
+                cell.SetColor(cell.OriginalColor);
+            }
         }
 
         if(isAttackMode)
@@ -190,7 +194,7 @@ public class PlayerState : NetworkBehaviour
         attackHistory.Clear();
         foreach (Cell cell in cells)
         {
-            if (cell.HitColor == Color.red || cell.HitColor == Color.white)
+            if (cell.HitColor == Color.red || cell.HitColor == Color.white && cell.GetCellType() != ECellType.Land)
             {
                 attackHistory.Add((cell.Row, cell.Col, cell.HitColor));
             }
@@ -207,7 +211,7 @@ public class PlayerState : NetworkBehaviour
         defenseHistory.Clear();
         foreach (Cell cell in cells)
         {
-            if (cell.HitColor == Color.red || cell.HitColor == Color.white)
+            if (cell.HitColor == Color.red || cell.HitColor == Color.white && cell.GetCellType() != ECellType.Land)
             {
                 defenseHistory.Add((cell.Row, cell.Col, cell.HitColor));
             }
@@ -243,6 +247,12 @@ public class PlayerState : NetworkBehaviour
         attacker.AttackResultClientRpc(row,col, isHit, attackerId);
 
         ulong nextPlayerId = GetOpponentClientId(attackerId);
+        StartCoroutine(DelayTurnSwitch(1.5f, nextPlayerId));
+    }
+
+    private IEnumerator DelayTurnSwitch(float delay, ulong nextPlayerId)
+    {
+        yield return new WaitForSeconds(delay);
         gameManager.CurrentTurnPlayerId.Value = nextPlayerId;
         gameManager.UpdateTurnClientRpc(nextPlayerId);
     }

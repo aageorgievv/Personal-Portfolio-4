@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
+    public Color OriginalColor { get; private set; }
     public Color HitColor { get; private set; } = Color.blue;
     public int Row {  get; private set; }
     public int Col { get; private set; }
@@ -11,6 +12,11 @@ public class Cell : MonoBehaviour
     [SerializeField] private ECellType cellType;
 
     private bool isAttackable = false;
+
+    private void Awake()
+    {
+        OriginalColor = GetComponent<Renderer>().material.color;
+    }
 
     public ECellType GetCellType()
     {
