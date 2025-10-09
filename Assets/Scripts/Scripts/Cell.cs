@@ -40,12 +40,3 @@ public class Cell : MonoBehaviour
         SetColor(color);
     }
 }
-
-// State 1 - Attack
-// - Hide my ships
-// - Cells show where I have attacked
-// - Never show oponent ships (until they are sunk)
-
-// State 2 - Defense
-// - Show My Own ships
-// - Cells show where opponent has attacked

@@ -221,6 +221,7 @@ public class PlayerState : NetworkBehaviour
         ulong attackerId = rpcParams.Receive.SenderClientId;
         ulong defenderId = GetOpponentClientId(attackerId);
 
+        PlayerState attacker = NetworkManager.Singleton.ConnectedClients[attackerId].PlayerObject.GetComponent<PlayerState>();
         PlayerState defender = NetworkManager.Singleton.ConnectedClients[defenderId].PlayerObject.GetComponent<PlayerState>();
 
         bool isHit = false;
@@ -237,7 +238,9 @@ public class PlayerState : NetworkBehaviour
                     isHit = true;
             }
         }
-        AttackResultClientRpc(row, col, isHit, attackerId);
+
+        defender.AttackResultClientRpc(row, col, isHit, attackerId);
+        attacker.AttackResultClientRpc(row,col, isHit, attackerId);
 
         ulong nextPlayerId = GetOpponentClientId(attackerId);
         gameManager.CurrentTurnPlayerId.Value = nextPlayerId;
