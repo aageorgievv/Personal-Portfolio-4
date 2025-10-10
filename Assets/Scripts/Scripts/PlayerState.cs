@@ -24,6 +24,8 @@ public class PlayerState : NetworkBehaviour
     private readonly List<(int row, int col, Color color)> attackHistory = new();
     private readonly List<(int row, int col, Color color)> defenseHistory = new();
 
+    private Dictionary<ShipPlacementData, int> shipHealth = new();
+
     private void Awake()
     {
         GameManager.ExecuteWhenInitialized(HandleWhenInitialized);
@@ -102,10 +104,12 @@ public class PlayerState : NetworkBehaviour
     private void SubmitShipsToServerRpc(ShipPlacementData[] ships)
     {
         Ships.Clear();
+        shipHealth.Clear();
 
         foreach (var ship in ships)
         {
             Ships.Add(ship);
+            shipHealth[ship] = ship.size;
         }
 
         placedShips.Value = Ships.Count;
@@ -158,13 +162,13 @@ public class PlayerState : NetworkBehaviour
 
         foreach (Cell cell in cells)
         {
-            if(cell.GetCellType() != ECellType.Land)
+            if (cell.GetCellType() != ECellType.Land)
             {
                 cell.SetColor(cell.OriginalColor);
             }
         }
 
-        if(isAttackMode)
+        if (isAttackMode)
         {
             Debug.LogError($"Client {OwnerClientId} UpdateOwnGrid attack");
 
@@ -173,7 +177,8 @@ public class PlayerState : NetworkBehaviour
                 Cell cell = grid.GetCell(entry.row, entry.col);
                 cell?.SetColor(entry.color);
             }
-        } else
+        }
+        else
         {
             Debug.LogError($"Client {OwnerClientId} UpdateOwnGrid defense");
 
@@ -229,25 +234,54 @@ public class PlayerState : NetworkBehaviour
         PlayerState defender = NetworkManager.Singleton.ConnectedClients[defenderId].PlayerObject.GetComponent<PlayerState>();
 
         bool isHit = false;
+        ShipPlacementData? hitShip = null;
         foreach (var ship in defender.Ships)
         {
             if (ship.horizontal)
             {
                 if (col == ship.y && row >= ship.x && row < ship.x + ship.size)
+                {
                     isHit = true;
+                    hitShip = ship;
+                    break;
+                }
             }
             else
             {
                 if (row == ship.x && col >= ship.y && col < ship.y + ship.size)
+                {
                     isHit = true;
+                    hitShip = ship;
+                    break;
+                }
             }
         }
 
         defender.AttackResultClientRpc(row, col, isHit, attackerId);
-        attacker.AttackResultClientRpc(row,col, isHit, attackerId);
+        attacker.AttackResultClientRpc(row, col, isHit, attackerId);
 
-        ulong nextPlayerId = GetOpponentClientId(attackerId);
-        StartCoroutine(DelayTurnSwitch(1.5f, nextPlayerId));
+        if (isHit && hitShip.HasValue)
+        {
+            defender.shipHealth[hitShip.Value]--;
+
+            bool allDestroyed = true;
+            foreach (var kvp in defender.shipHealth)
+            {
+                if (kvp.Value > 0)
+                {
+                    allDestroyed = false;
+                    break;
+                }
+            }
+
+            if (allDestroyed)
+            {
+                GameOverClientRpc(attackerId, defenderId);
+            }
+
+            ulong nextPlayerId = GetOpponentClientId(attackerId);
+            StartCoroutine(DelayTurnSwitch(1.5f, nextPlayerId));
+        }
     }
 
     private IEnumerator DelayTurnSwitch(float delay, ulong nextPlayerId)
@@ -269,10 +303,11 @@ public class PlayerState : NetworkBehaviour
         {
             attackedCell.SetAttackResult(hit);
 
-            if(attackerId == OwnerClientId)
+            if (attackerId == OwnerClientId)
             {
                 SaveAttackGrid();
-            } else
+            }
+            else
             {
                 SaveDefenseGrid();
             }
@@ -318,5 +353,20 @@ public class PlayerState : NetworkBehaviour
         }
 
         Debug.Log("Switched to Defense mode");
+    }
+
+    [ClientRpc]
+    private void GameOverClientRpc(ulong winnerId, ulong loserId)
+    {
+        UIManager ui = GameManager.GetManager<UIManager>();
+
+        if (NetworkManager.Singleton.LocalClientId == winnerId)
+        {
+            ui.ShowGameOver(true);
+        }
+        else if (NetworkManager.Singleton.LocalClientId == loserId)
+        {
+            ui.ShowGameOver(false);
+        }
     }
 }
