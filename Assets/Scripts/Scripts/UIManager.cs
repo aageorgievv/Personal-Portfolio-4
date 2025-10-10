@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour, IManager
     [SerializeField] private TMP_Text readyButtonText;
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private TMP_Text gameOverText;
+    [SerializeField] private GameObject turnPanel;
 
     private ShipSelection shipSelection;
 
@@ -50,5 +51,10 @@ public class UIManager : MonoBehaviour, IManager
     {
         gameOverPanel.SetActive(true);
         gameOverText.text = isWinner ? "You Win!" : "You Lose!";
+    }
+
+    public void ToggleTurnPanel(bool state)
+    {
+        turnPanel.SetActive(state);
     }
 }

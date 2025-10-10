@@ -145,7 +145,7 @@ public class GameManager : NetworkBehaviour, IManager
         }
 
         Debug.LogError("All players ready → Start Game!");
-        uiManager.DisableReadyButton();
+        DisableReadyButtonClientRpc();
         isGameStarted.Value = true;
 
         CurrentTurnPlayerId.Value = NetworkManager.Singleton.ConnectedClientsList[0].ClientId;
@@ -180,13 +180,21 @@ public class GameManager : NetworkBehaviour, IManager
                 {
                     state.SetAttackMode();
                     state.UpdateOwnGrid(true);
+                    uiManager.ToggleTurnPanel(true);
                 }
                 else
                 {
                     state.SetDefenseMode();
                     state.UpdateOwnGrid(false);
+                    uiManager.ToggleTurnPanel(false);
                 }
             }
         }
+    }
+
+    [ClientRpc]
+    private void DisableReadyButtonClientRpc()
+    {
+        uiManager.DisableReadyButton();
     }
 }

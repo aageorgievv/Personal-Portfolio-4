@@ -26,6 +26,8 @@ public class PlayerState : NetworkBehaviour
 
     private Dictionary<ShipPlacementData, int> shipHealth = new();
 
+    private bool hasAttacked = false;
+
     private void Awake()
     {
         GameManager.ExecuteWhenInitialized(HandleWhenInitialized);
@@ -152,6 +154,13 @@ public class PlayerState : NetworkBehaviour
 
     public void AttackCell(int row, int col)
     {
+        if (hasAttacked)
+        {
+            return;
+        }
+
+        hasAttacked = true;
+
         AttackServerRpc(row, col);
     }
 
@@ -278,10 +287,9 @@ public class PlayerState : NetworkBehaviour
             {
                 GameOverClientRpc(attackerId, defenderId);
             }
-
-            ulong nextPlayerId = GetOpponentClientId(attackerId);
-            StartCoroutine(DelayTurnSwitch(1.5f, nextPlayerId));
         }
+        ulong nextPlayerId = GetOpponentClientId(attackerId);
+        StartCoroutine(DelayTurnSwitch(1.5f, nextPlayerId));
     }
 
     private IEnumerator DelayTurnSwitch(float delay, ulong nextPlayerId)
@@ -329,6 +337,7 @@ public class PlayerState : NetworkBehaviour
 
     public void SetAttackMode()
     {
+        hasAttacked = false;
         Ship[] ships = shipSelection.GetAllShips();
         foreach (var ship in ships)
         {
